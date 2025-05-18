@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
   webpack: (config, { dev, isServer }) => {
     // Resolver problemas com framer-motion no build
     if (!dev && !isServer) {
