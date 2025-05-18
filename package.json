@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "rm -rf .next && rm -rf node_modules/.cache",
+    "build:clean": "npm run clean && npm run build",
+    "type-check": "tsc --noEmit",
+    "update-browserslist": "npx update-browserslist-db@latest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
