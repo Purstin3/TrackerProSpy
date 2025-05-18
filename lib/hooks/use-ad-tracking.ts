@@ -31,14 +31,14 @@ export function useAdTracking(offerId: string | null, days: number = 30) {
     return data as AdTracking[];
   };
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<AdTracking[], Error>({
     queryKey: ['adTracking', offerId, days],
     queryFn: fetchAdTracking,
     enabled: !!offerId,
-    onSuccess: (data: AdTracking[]) => {
+    onSuccess(data) {
       setAdTrackingData(data);
     },
-    onError: (error: Error) => {
+    onError(error: Error) {
       setError(error.message);
     },
   });
