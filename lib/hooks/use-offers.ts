@@ -1,98 +1,65 @@
-"use client";
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { Offer } from '@/types';
-import { useStore } from '@/lib/store';
+interface Offer {
+  id: string;
+  name: string;
+  status: 'active' | 'paused' | 'completed';
+  budget: number;
+  spent: number;
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const fetchOffers = async (): Promise<Offer[]> => {
+  const response = await fetch('/api/offers');
+  if (!response.ok) {
+    throw new Error('Failed to fetch offers');
+  }
+  return response.json();
+};
 
 export function useOffers() {
-  const queryClient = useQueryClient();
-  const setOffers = useStore((state) => state.setOffers);
-  const setIsLoading = useStore((state) => state.setIsLoading);
-  const setError = useStore((state) => state.setError);
+  const [offers, setOffers] = useState<Offer[]>([]);
 
-  const fetchOffers = async (): Promise<Offer[]> => {
-    const { data, error } = await supabase
-      .from('offers')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      throw new Error(error.message);
-    }
-    
-    return data as Offer[];
-  };
-
-  const { data: offers, isLoading } = useQuery({
+  const {
+    data,
+    error,
+    isLoading,
+    isError,
+    isSuccess,
+    refetch
+  } = useQuery({
     queryKey: ['offers'],
     queryFn: fetchOffers,
-    onSuccess: (data) => {
+  });
+
+  // Usar useEffect para reagir aos dados de sucesso
+  useEffect(() => {
+    if (isSuccess && data) {
       setOffers(data);
-    },
-    onError: (error: Error) => {
-      setError(error.message);
-    },
-  });
+    }
+  }, [isSuccess, data]);
 
-  const createOfferMutation = useMutation({
-    mutationFn: async (newOffer: Omit<Offer, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('offers')
-        .insert([{
-          ...newOffer,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }])
-        .select();
-      
-      if (error) throw new Error(error.message);
-      return data[0] as Offer;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['offers'] });
-    },
-  });
-
-  const updateOfferMutation = useMutation({
-    mutationFn: async ({ id, ...updateData }: Partial<Offer> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('offers')
-        .update({
-          ...updateData,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id)
-        .select();
-      
-      if (error) throw new Error(error.message);
-      return data[0] as Offer;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['offers'] });
-    },
-  });
-
-  const deleteOfferMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('offers')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw new Error(error.message);
-      return id;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['offers'] });
-    },
-  });
+  // Usar useEffect para reagir a erros
+  useEffect(() => {
+    if (isError && error) {
+      console.error('Error fetching offers:', error);
+      // Aqui você pode adicionar lógica adicional de tratamento de erro
+      // como toast notifications, etc.
+    }
+  }, [isError, error]);
 
   return {
-    offers: offers || [],
+    offers,
     isLoading,
-    createOffer: createOfferMutation.mutate,
-    updateOffer: updateOfferMutation.mutate,
-    deleteOffer: deleteOfferMutation.mutate,
+    error,
+    refetch,
+    // Propriedades adicionais que podem ser úteis
+    isError,
+    isSuccess,
   };
 }
