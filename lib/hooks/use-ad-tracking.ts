@@ -35,7 +35,7 @@ export function useAdTracking(offerId: string | null, days: number = 30) {
     queryKey: ['adTracking', offerId, days],
     queryFn: fetchAdTracking,
     enabled: !!offerId,
-    onSuccess: (data) => {
+    onSuccess: (data: AdTracking[]) => {
       setAdTrackingData(data);
     },
     onError: (error: Error) => {
