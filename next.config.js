@@ -5,7 +5,7 @@ const nextConfig = {
     if (!dev && !isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
-        'framer-motion': require.resolve('framer-motion'),
+        'framer-motion': require.resolve('framer-motion')
       };
       
       // Otimizações para vendor chunks
@@ -20,16 +20,16 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/]/,
               name: 'vendors',
               chunks: 'all',
-              priority: 10,
+              priority: 10
             },
             framerMotion: {
               test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
               name: 'framer-motion',
               chunks: 'all',
-              priority: 20,
-            },
-          },
-        },
+              priority: 20
+            }
+          }
+        }
       };
     }
 
@@ -44,13 +44,13 @@ const nextConfig = {
   
   // ESLint configuração
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true
   },
   
   // TypeScript configuração
   typescript: {
-    ignoreBuildErrors: false,
-  },
-}
+    ignoreBuildErrors: false
+  }
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
